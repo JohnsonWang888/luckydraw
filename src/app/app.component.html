@@ -1,0 +1,110 @@
+<div id="root">
+  <div id="main"></div>
+  <div id="tags">
+    <ul *ngFor="let t of tags">
+      <li>
+        <a href="javascript:void(0);" style="color: #fff">
+          {{t.text}}
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- 播放按钮 -->
+  <nz-affix style="position: absolute; top: 10px; right: 100px;">
+    <a>
+      <span (click)="audioStop()" *ngIf="audioPlaying" style="color: #FFFF00">停止</span>
+      <span (click)="audioPlay()" *ngIf="!audioPlaying" style="color: #FFFF00">播放</span>
+    </a>
+  </nz-affix>
+
+  <nz-affix style="position: absolute; top: 45%; right: 20px;">
+    <div class="lucky-btn" (click)="gogogogo()" *ngIf="showGoBtn">开始</div>
+    <div class="lucky-btn" (click)="showRs()" *ngIf="showRsBtn">暂停</div>
+    <div class="lucky-btn" (click)="next()" *ngIf="showNextBtn">第{{times}}轮</div>
+    <div class="lucky-btn" (click)="finish()" *ngIf="showOverBtn">结束</div>
+  </nz-affix>
+
+  <!-- 配置按钮 -->
+  <nz-affix style="position: absolute; bottom: 10px; right: 100px;">
+    <a nz-dropdown [nzDropdownMenu]="menu" style="color: #FFFF00">
+      配置
+    </a>
+    <nz-dropdown-menu #menu="nzDropdownMenu">
+      <ul nz-menu nzSelectable>
+        <li nz-menu-item (click)="showResult()">查看结果</li>
+        <li nz-menu-item (click)="showNewModal()">新加一轮</li>
+        <li nz-menu-item (click)="reset()">重置</li>
+      </ul>
+    </nz-dropdown-menu>
+  </nz-affix>
+
+  <!--奖品图片-->
+  <section *ngIf="isShowCurrentRs" [ngClass]="{
+    'award-img-t': (times === 6),
+    'award-img-1': (times === 5),
+    'award-img-2': (times === 4),
+    'award-img-3': (times === 3),
+    'award-img-4': (times === 2)
+  }">
+    <div class="imgs"></div>
+  </section>
+
+  <!-- 当前抽奖结果 -->
+  <section class="current-rs" *ngIf="isShowCurrentRs" [@slideInOut]>
+    <p (click)="closeWin()" class="title">
+      {{currenWin.type}}
+      <span style="font-size: .8rem;">(共{{currenWin.value.length}}个)</span>
+    </p>
+    <ul [ngStyle]="{'text-align':(currenWin.value.length < 10) ? 'center' : 'left' }">
+      <li *ngFor="let item of currenWin.value" class="count">
+        {{item}}
+      </li>
+    </ul>
+  </section>
+
+  <!--全部中奖信息-->
+  <section class="current-rs" *ngIf="isShowRs" [@slideInOut]>
+    <p (click)="closeRsWin()" class="title-rs">
+      全部抽奖结果
+    </p>
+    <ul *ngFor="let item of winPeople" class="content">
+      <div class="left">{{item.type}}</div>
+      <li *ngFor="let t of item.value" class="right">
+        {{t}}
+      </li>
+    </ul>
+  </section>
+
+  <audio
+      id="audiobg"
+      preload="auto"
+      controls
+      autoplay
+      loop
+      >
+      <source [src]="audioBg" *ngIf="(showNextBtn || showOverBtn) && !isShowCurrentRs" />
+      <source [src]="audioStart" *ngIf="showGoBtn" />
+      <source [src]="audioPlaye" *ngIf="showRsBtn" />
+      <source [src]="audioEnd" *ngIf="isShowCurrentRs" />
+      你的浏览器不支持audio标签
+    </audio>
+</div>
+
+<!--新加一轮抽奖弹框-->
+<nz-modal [(nzVisible)]="isVisible" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+  <form nz-form [formGroup]="validateForm">
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="name">抽奖名称</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input formControlName="name" id="name" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="num" nzRequired>中奖人数</nz-form-label>
+      <nz-form-control [nzSm]="14" [nzXs]="24">
+        <input nz-input id="num" formControlName="num" />
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+</nz-modal>
